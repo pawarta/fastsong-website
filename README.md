@@ -1,14 +1,18 @@
-FASTSONG Premium Static Generator
+FASTSONG Premium Editorial Generator
 
-This repository now includes a more complete static website generator for FASTSONG using the domain `https://fastsong.eu.org`.
+This repository contains a premium static-site generator for FASTSONG using the domain:
+https://fastsong.eu.org
 
-What is included:
-- Premium responsive homepage and blog layout
-- Music download and genre/category landing pages
-- Category pages and article pages
-- Support tools and tool landing pages
-- SEO metadata, JSON-LD, Open Graph, canonical, adsense, verification
-- PWA manifest and root files for static publishing
+Features:
+- SEO-ready pages with meta title, description, keywords, Open Graph, canonical links
+- Google verification and AdSense metadata
+- PWA manifest and root static files
+- Responsive premium layout
+- Blog categories and article generation
+- Download/genre/category pages
+- Tool pages and multiple landing sections
+- Automatic folder generation for category, genre, blog, and tools
+- 35 article pages per category
 
 How to generate the site:
 
@@ -16,20 +20,25 @@ How to generate the site:
 python generate_fastsong.py
 ```
 
-The generated upload-ready static output is placed in:
-
-```bash
-dist/
-```
-
-The static site is designed to be uploaded to:
+Then upload the contents of `dist/` to any static hosting platform such as:
 - Netlify
 - Vercel
 - GitHub Pages
 - cPanel
 - S3 static hosting
 
-Notes:
-- The domain used is `https://fastsong.eu.org`
-- All head metadata includes Google verification and AdSense setup
-- The folder is ready for direct upload after generation
+Files included in generated output:
+- `dist/index.html`
+- `dist/blog/`
+- `dist/category/`
+- `dist/genre/`
+- `dist/tools/`
+- `dist/music-downloads/`
+- `dist/manifest.json`
+- `dist/robots.txt`
+- `dist/sitemap.xml`
+- `dist/ads.txt`
+- `dist/app-ads.txt`
+- `dist/google510371859970acbf.html`
+
+This generator is designed to create the final editorial-premium site structure automatically, without needing manual HTML creation for each page.
