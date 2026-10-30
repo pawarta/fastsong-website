@@ -1,59 +1,170 @@
 from pathlib import Path
 import json
+import re
 from textwrap import dedent
 
 SITE_DOMAIN = "https://fastsong.eu.org"
 SITE_NAME = "FASTSONG"
-GOOGLE_VERIFICATION = "xMW77g3fbb-5Di9z1eZWT9pdaR91IsnYQBhJqbOpMdk"
-ADSENSE_ID = "ca-pub-9308517202792186"
+GOOGLE_VERIFY_1 = "Gw7Z7swUZPrZIYzmklJDBBAZ_T6WcayrdpFYVbQhnEg"
+GOOGLE_VERIFY_2 = "xMW77g3fbb-5Di9z1eZWT9pdaR91IsnYQBhJqbOpMdk"
+ADSENSE_CLIENT = "ca-pub-9308517202792186"
 
-def slugify(text: str) -> str:
-    text = text.strip().lower()
-    text = ''.join(ch if ch.isalnum() or ch in " -_" else "" for ch in text)
-    text = text.replace(" ", "-")
-    text = text.replace("_", "-")
-    while "--" in text:
-        text = text.replace("--", "-")
-    return text.strip("-")
+CATEGORIES = [
+    "Instrumental Music",
+    "Vocal Songs",
+    "Short Cues | Intros",
+    "Loops",
+    "Sound Effects",
+    "Alert",
+    "Ambience | Background",
+    "Click | Pop | Bell",
+    "Clock | Timer | Counter",
+    "Comedy | Funny",
+    "Hit | Explosion | Impact",
+    "Household",
+    "Nature | Animal",
+    "People | Human",
+    "Sci-Fi | Artificial",
+    "Swoosh | Rise",
+    "Technology | Tools",
+    "Macro Economy",
+    "Explainers",
+    "Manufacturing",
+    "Property",
+    "Health",
+    "Education",
+    "Lifestyle",
+    "Hospitality",
+    "Tech & Media",
+    "SMEs",
+    "Luxury",
+    "Whos Who",
+    "International",
+    "Local Resources",
+    "Politics",
+    "Culture",
+    "Science",
+    "Public Policy",
+    "Business News",
+    "Sports",
+    "Arts",
+    "Celebrities",
+    "Automotive",
+    "Commentary",
+    "Interview",
+]
+
+GENRES = [
+    "Acoustic", "Ambient", "Arpeggio", "Asian", "Bach", "Beats", "Blues",
+    "Cinematic", "Classical", "Dark", "Dramatic", "Drums", "Electronic",
+    "Energetic", "Epic", "Fantasy", "Flute", "Folk", "Funny", "Guitar",
+    "Happy", "Horror", "House", "Indian", "Jazz", "LoFi", "Lounge",
+    "Motivational", "Nature", "Old", "Orchestral", "Piano", "Pop", "Relaxing",
+    "Romantic", "Sad", "Sitar", "Slow", "Soft", "Spiritual", "Techno",
+    "Trap", "Tropical", "Ukulele", "Violin", "Vocal", "World",
+]
+
+TOOLS = [
+    {"slug": "practice-timer", "title": "Practice Timer", "icon": "⏱️", "desc": "Pomodoro-style timer for focused music practice sessions."},
+    {"slug": "pitch-pipe", "title": "Pitch Pipe", "icon": "🎼", "desc": "Reference tones for all 12 chromatic notes. Perfect for singers."},
+    {"slug": "circle-of-fifths", "title": "Circle of Fifths", "icon": "⭕", "desc": "Interactive diagram showing key relationships and music theory."},
+    {"slug": "playlist-generator", "title": "Playlist Generator", "icon": "🎵", "desc": "Build themed tracks and curated playlists for your content."},
+    {"slug": "genre-finder", "title": "Genre Finder", "icon": "🔎", "desc": "Find music styles and moods by your creative context."},
+    {"slug": "playlist-analyzer", "title": "Playlist Analyzer", "icon": "📊", "desc": "Review the structure and rhythm of your playlist."},
+]
+
+LEGAL_PAGES = {
+    "about-us": "About Us",
+    "contact-us": "Contact Us",
+    "terms": "Terms of Service",
+    "privacy-policy": "Privacy Policy",
+    "sitemaps": "Sitemaps",
+    "rss-xml": "RSS XML",
+    "atom-xml": "Atom XML",
+    "dmca": "DMCA",
+    "disclaimer": "Disclaimer",
+    "changelog": "Changelog",
+    "partner": "Partner",
+    "editorial": "Editorial",
+    "advertise": "Advertise",
+    "join-the-team": "Join the Team",
+    "news-update": "News Update",
+    "academy": "Academy",
+    "training": "Training",
+    "private": "Private",
+}
 
 
-def render_head(title: str, description: str, keywords: str, canonical: str):
+def slugify(value: str) -> str:
+    value = value.strip().lower()
+    value = re.sub(r"[^a-z0-9\s-]", "", value)
+    value = re.sub(r"[\s_-]+", "-", value)
+    value = value.strip("-")
+    return value
+
+
+def clean_text(value: str) -> str:
+    return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def make_ld_json(title: str, description: str, url: str):
+    return f"""
+    <script type="application/ld+json">
+    {{
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "{clean_text(title)}",
+      "description": "{clean_text(description)}",
+      "url": "{url}",
+      "publisher": {{
+        "@type": "Organization",
+        "name": "FASTSONG",
+        "url": "{SITE_DOMAIN}"
+      }}
+    }}
+    </script>
+    """
+
+
+def render_head(title: str, description: str, keywords: str, canonical_url: str, og_image: str = f"{SITE_DOMAIN}/assets/images/og-default.jpg"):
     return dedent(f"""
     <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-      <meta content='Gw7Z7swUZPrZIYzmklJDBBAZ_T6WcayrdpFYVbQhnEg' name='google-site-verification'/>
-      <meta content='xMW77g3fbb-5Di9z1eZWT9pdaR91IsnYQBhJqbOpMdk' name='google-site-verification'/>
-      <meta name="google-site-verification" content="xMW77g3fbb-5Di9z1eZWT9pdaR91IsnYQBhJqbOpMdk" />
-      <meta content='ca-pub-9308517202792186' name='google-adsense-account'/>
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_ID}"></script>
-      <meta name="description" content="{description}" />
-      <meta name="keywords" content="{keywords}" />
-      <meta property="og:type" content="website" />
-      <meta property="og:title" content="{title}" />
-      <meta property="og:description" content="{description}" />
-      <meta property="og:image" content="{SITE_DOMAIN}/assets/images/og-default.jpg" />
-      <meta property="og:url" content="{canonical}" />
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content="{title}" />
-      <meta name="twitter:description" content="{description}" />
-      <meta name="twitter:image" content="{SITE_DOMAIN}/assets/images/og-default.jpg" />
-      <link rel="canonical" href="{canonical}" />
-      <link rel="manifest" href="/manifest.json" />
-      <link rel="apple-touch-icon" href="/assets/icons/icon-192.png" />
-      <meta name="theme-color" content="#0f172a" />
-      <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-      <title>{title}</title>
-      <link rel="stylesheet" href="/assets/css/style.css" />
-      <script defer src="/assets/js/app.js"></script>
+        <meta charset="UTF-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta content='Gw7Z7swUZPrZIYzmklJDBBAZ_T6WcayrdpFYVbQhnEg' name='google-site-verification'/>
+        <meta content='xMW77g3fbb-5Di9z1eZWT9pdaR91IsnYQBhJqbOpMdk' name='google-site-verification'/>
+        <meta name="google-site-verification" content="xMW77g3fbb-5Di9z1eZWT9pdaR91IsnYQBhJqbOpMdk"/>
+        <meta content='ca-pub-9308517202792186' name='google-adsense-account'/>
+        <script async='async' crossorigin='anonymous' src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9308517202792186'></script>
+        <script async='async' custom-element='amp-ad' src='https://cdn.ampproject.org/v0/amp-ad-0.1.js'></script>
+        <meta content='width=device-width, initial-scale=1' name='viewport'/>
+        <title>{clean_text(title)}</title>
+        <meta name="description" content="{clean_text(description)}"/>
+        <meta name="keywords" content="{clean_text(keywords)}"/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:title" content="{clean_text(title)}"/>
+        <meta property="og:description" content="{clean_text(description)}"/>
+        <meta property="og:image" content="{og_image}"/>
+        <meta property="og:url" content="{canonical_url}"/>
+        <meta name="twitter:card" content="summary_large_image"/>
+        <meta name="twitter:title" content="{clean_text(title)}"/>
+        <meta name="twitter:description" content="{clean_text(description)}"/>
+        <meta name="twitter:image" content="{og_image}"/>
+        <link rel="canonical" href="{canonical_url}"/>
+        <link rel="manifest" href="/manifest.json"/>
+        <link rel="apple-touch-icon" href="/assets/icons/icon-192.png"/>
+        <meta name="theme-color" content="#0f172a"/>
+        <meta name="apple-mobile-web-app-capable" content="yes"/>
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+        <link rel="stylesheet" href="/assets/css/style.css"/>
+        <script defer src="/assets/js/app.js"></script>
+        {make_ld_json(title, description, canonical_url)}
     </head>
     """).strip()
 
 
-def header():
-    menu = [
+def render_header(active_label: str = "Home"):
+    items = [
         ("Home", "/"),
         ("Tools", "/tools/"),
         ("Finders", "/finders/"),
@@ -64,18 +175,18 @@ def header():
         ("Terms", "/terms/"),
         ("Privacy Policy", "/privacy-policy/"),
     ]
-    links = "".join(f"<li><a href='{href}'>{label}</a></li>" for label, href in menu)
+    nav = "".join(f"<li class='nav-item'><a href='{href}' {'class=\'active\'' if label == active_label else ''}>{label}</a></li>" for label, href in items)
     langs = "".join(f"<span>{lang}</span>" for lang in ["English", "Rusia", "Eropa", "Jp", "Id", "Arab"])
     return dedent(f"""
     <header class="site-header">
       <div class="container topbar">
-        <div class="logo-box">
-          <a href="/" aria-label="FASTSONG Home">
-            <img src="/assets/images/logo.png" alt="FASTSONG logo" />
+        <div class="brand">
+          <a href="/" aria-label="FASTSONG home">
+            <img src="/assets/images/logo.svg" alt="FASTSONG logo" />
           </a>
         </div>
-        <nav>
-          <ul class="nav">{links}</ul>
+        <nav class="main-nav">
+          <ul>{nav}</ul>
         </nav>
         <div class="lang-switcher">{langs}</div>
       </div>
@@ -83,22 +194,22 @@ def header():
     """).strip()
 
 
-def footer():
+def render_footer():
     return dedent(f"""
     <footer class="site-footer">
       <div class="container footer-grid">
         <div>
-          <img src="/assets/images/logo.png" alt="FASTSONG logo" />
-          <p>FASTSONG is a modern resource hub for free music downloads, sound effects, creator tools, and media resources.</p>
+          <img src="/assets/images/logo.svg" alt="FASTSONG logo" />
+          <p>FASTSONG is a modern resource hub for royalty-free music, download collections, sound effects, creator tools, and premium editorial content.</p>
         </div>
         <div>
-          <h4>Tools</h4>
+          <h4>Speech to text software</h4>
           <ul>
-            <li><a href="/tools/">Speech to text software</a></li>
             <li><a href="/tools/">Audio converter</a></li>
             <li><a href="/tools/">MP3 converter</a></li>
             <li><a href="/tools/">MP3 Cutter</a></li>
             <li><a href="/tools/">Video converter</a></li>
+            <li><a href="/tools/">Vocal remover</a></li>
           </ul>
         </div>
         <div>
@@ -108,146 +219,351 @@ def footer():
             <li><a href="/about-us/">About Us</a></li>
             <li><a href="/contact-us/">Contact Us</a></li>
             <li><a href="/privacy-policy/">Privacy Policy</a></li>
-            <li><a href="/terms/">Terms of Service</a></li>
+            <li><a href="/terms/">Term of Service</a></li>
           </ul>
         </div>
         <div>
-          <h4>Company</h4>
+          <h4>Community</h4>
           <ul>
             <li><a href="/news-update/">News Update</a></li>
             <li><a href="/academy/">Academy</a></li>
             <li><a href="/training/">Training</a></li>
-            <li><a href="/partners/">Partner</a></li>
+            <li><a href="/partner/">Partner</a></li>
             <li><a href="/advertise/">Advertise</a></li>
           </ul>
         </div>
       </div>
-      <div class="copyright">© <a href="{SITE_DOMAIN}">FASTSONG</a> - All Rights Reserved - Powered by <a href="https://relmusic.github.io">Relmusic</a></div>
+      <div class="copyright">© <a href="https://fastsong.eu.org">FASTSONG</a> - All Rights Reserved - Powered by <a href="https://relmusic.github.io">Relmusic</a></div>
     </footer>
     """).strip()
 
 
-def page_html(title: str, description: str, keywords: str, canonical: str, body: str):
-    return f"<!DOCTYPE html><html lang='en'>\n{render_head(title, description, keywords, canonical)}\n<body>\n{header()}\n<main>{body}</main>\n{footer()}\n</body></html>\n"
+def render_page(title: str, description: str, keywords: str, canonical_url: str, content: str, active_label: str = "Home"):
+    return f"""<!DOCTYPE html>
+<html lang="en">
+{render_head(title, description, keywords, canonical_url)}
+<body>
+{render_header(active_label)}
+<main>{content}</main>
+{render_footer()}
+</body>
+</html>
+"""
 
 
-def build_home():
-    body = dedent(f"""
+def hero_html():
+    return dedent("""
     <section class="hero">
       <div class="container hero-grid">
         <div>
           <span class="eyebrow">Royalty Free Music</span>
-          <h1>Free Music Download, Sound Effects & Creative Tools</h1>
-          <p>FASTSONG helps creators, editors, and media teams access free music, sound effects, music tools, and premium-style resources built for digital publishing.</p>
+          <h1>Free Music Download, Sound Effects, and Creator Tools</h1>
+          <p>Explore thousands of royalty-free music tracks, cinematic sound effects, downloadable resources, and creator workflow tools designed for editors, YouTubers, podcasters, and media teams.</p>
           <div class="cta-row">
-            <a class="btn primary" href="/tools/">Explore Tools</a>
+            <a class="btn primary" href="/music-downloads/">Download Music</a>
             <a class="btn ghost" href="/blog/">Browse Blog</a>
           </div>
         </div>
         <div class="hero-card">
-          <div class="mini-tool"><span>⏱️</span><div><strong>Practice Timer</strong><small>Pomodoro practice timer</small></div></div>
-          <div class="mini-tool"><span>🎼</span><div><strong>Pitch Pipe</strong><small>Reference tone generator</small></div></div>
-          <div class="mini-tool"><span>⭕</span><div><strong>Circle of Fifths</strong><small>Music theory reference</small></div></div>
+          <div class="mini-tool"><span>🎵</span><div><strong>Playlist Generator</strong><small>Curate themed tracks in minutes</small></div></div>
+          <div class="mini-tool"><span>⏱️</span><div><strong>Practice Timer</strong><small>Focus-friendly sessions</small></div></div>
+          <div class="mini-tool"><span>🎼</span><div><strong>Pitch Pipe</strong><small>Reference tones for singers</small></div></div>
         </div>
       </div>
     </section>
+    """).strip()
 
+
+def build_home_page():
+    category_cards = "".join(f"<a class='category-card' href='/category/{slugify(cat)}/'>{cat}</a>" for cat in CATEGORIES[:12])
+    popular_posts = "".join(
+        f"<article class='post-card'><div class='tag'>{cat}</div><h3>Best {cat.lower()} resources for modern creators</h3><a href='/blog/{slugify(cat)}/best-{slugify(cat)}-resources.html'>Read article</a></article>"
+        for cat in CATEGORIES[:3]
+    )
+    tool_cards = "".join(
+        f"<article class='tool-card'><div class='icon'>{tool['icon']}</div><h3>{tool['title']}</h3><p>{tool['desc']}</p><a href='/tools/{tool['slug']}.html'>USE NOW</a></article>"
+        for tool in TOOLS
+    )
+    genre_tags = "".join(f"<span>{g}</span>" for g in GENRES[:30])
+    content = dedent(f"""
+    {hero_html()}
     <section class="container section-block">
       <div class="section-head"><h2>Popular Categories</h2></div>
-      <div class="category-grid">
-        <a class="category-card" href="/blog/instrumental-music/">Instrumental Music</a>
-        <a class="category-card" href="/blog/vocal-songs/">Vocal Songs</a>
-        <a class="category-card" href="/blog/loops/">Loops</a>
-        <a class="category-card" href="/blog/sound-effects/">Sound Effects</a>
-        <a class="category-card" href="/blog/technology-tools/">Technology | Tools</a>
-        <a class="category-card" href="/blog/people-human/">People | Human</a>
-      </div>
+      <div class="category-grid">{category_cards}</div>
     </section>
-
     <section class="container section-block">
       <div class="section-head"><h2>Popular Posts</h2></div>
-      <div class="post-grid">
-        <article class="post-card"><div class="tag">Instrumental Music</div><h3>Best royalty free music tools for content creators</h3><a href="/blog/instrumental-music/best-royalty-free-music-tools-for-content-creators.html">Read article</a></article>
-        <article class="post-card"><div class="tag">Sound Effects</div><h3>How to choose the right sound effects for video editing</h3><a href="/blog/sound-effects/how-to-choose-right-sound-effects-for-video-editing.html">Read article</a></article>
-        <article class="post-card"><div class="tag">Technology | Tools</div><h3>Music production basics for beginners in 2026</h3><a href="/blog/technology-tools/music-production-basics-for-beginners-in-2026.html">Read article</a></article>
-      </div>
+      <div class="post-grid">{popular_posts}</div>
     </section>
-
     <section class="container section-block">
       <div class="section-head"><h2>All Tools</h2></div>
-      <div class="tool-grid">
-        <article class="tool-card"><div class="icon">⏱️</div><h3>Practice Timer</h3><p>Pomodoro-style timer for focused music practice sessions.</p><a href="/tools/practice-timer.html">USE NOW</a></article>
-        <article class="tool-card"><div class="icon">🎼</div><h3>Pitch Pipe</h3><p>Reference tones for all 12 chromatic notes. Perfect for singers.</p><a href="/tools/pitch-pipe.html">USE NOW</a></article>
-        <article class="tool-card"><div class="icon">⭕</div><h3>Circle of Fifths</h3><p>Interactive diagram showing key relationships and music theory.</p><a href="/tools/circle-of-fifths.html">USE NOW</a></article>
-      </div>
+      <div class="tool-grid">{tool_cards}</div>
+    </section>
+    <section class="container section-block">
+      <div class="section-head"><h2>Music Genres & Moods</h2></div>
+      <div class="genre-cloud">{genre_tags}</div>
     </section>
     """).strip()
-    return page_html(
+    return render_page(
         title="FASTSONG | Royalty Free Music, Sound Effects & Creator Tools",
-        description="Download free music, sound effects, and creator tools at FASTSONG. Explore royalty-free resources, articles, and practical audio solutions for modern creators.",
-        keywords="royalty free music, free music download, sound effects, music tools, FASTSONG",
-        canonical=f"{SITE_DOMAIN}/",
-        body=body,
+        description="FASTSONG provides free music downloads, sound effects, music tools, and SEO-friendly editorial resources for creators and media teams.",
+        keywords="royalty free music, free music download, sound effects, playlist generator, sound library, FASTSONG",
+        canonical_url=f"{SITE_DOMAIN}/",
+        content=content,
+        active_label="Home",
     )
 
 
-def build_blog_index():
-    body = dedent(f"""
-    <section class="container page-header"><h1>Blog</h1><p>Discover music inspiration, tools, sound design, production guides, and editorial resources.</p></section>
+def build_blog_index_page():
+    posts = "".join(
+        f"<article class='post-card'><div class='tag'>{cat}</div><h3>{cat} article collection</h3><a href='/category/{slugify(cat)}/'>Open category</a></article>"
+        for cat in CATEGORIES[:8]
+    )
+    content = dedent(f"""
+    <section class="container page-header">
+      <h1>FASTSONG Blog</h1>
+      <p>Explore music, sound design, editorial strategy, AI tools, free downloads, and practical advice for content creators.</p>
+    </section>
     <section class="container section-block">
-      <div class="post-grid">
-        <article class="post-card"><div class="tag">Instrumental Music</div><h3>Best royalty free music tools for content creators</h3><a href="/blog/instrumental-music/best-royalty-free-music-tools-for-content-creators.html">Read article</a></article>
-        <article class="post-card"><div class="tag">Sound Effects</div><h3>How to choose the right sound effects for video editing</h3><a href="/blog/sound-effects/how-to-choose-right-sound-effects-for-video-editing.html">Read article</a></article>
-        <article class="post-card"><div class="tag">Technology | Tools</div><h3>Music production basics for beginners in 2026</h3><a href="/blog/technology-tools/music-production-basics-for-beginners-in-2026.html">Read article</a></article>
-      </div>
+      <div class="post-grid">{posts}</div>
     </section>
     """).strip()
-    return page_html(
+    return render_page(
         title="Blog | FASTSONG",
-        description="Blog by FASTSONG covering royalty free music, sound effects, content creation, and audio tools.",
-        keywords="FASTSONG blog, music blog, sound effects, creator tools",
-        canonical=f"{SITE_DOMAIN}/blog/",
-        body=body,
+        description="Read editorial content on music production, sound effects, royalty-free music, tools, and creative strategy from FASTSONG.",
+        keywords="FASTSONG blog, music blog, sound effects, royalty free, audio tools",
+        canonical_url=f"{SITE_DOMAIN}/blog/",
+        content=content,
+        active_label="Home",
     )
 
 
-def build_tools_index():
-    body = dedent(f"""
-    <section class="container page-header"><h1>Tools</h1><p>Use practical music and creator tools for practice, theory, editing, and content workflows.</p></section>
+def build_music_downloads_page():
+    genre_links = "".join(f"<a class='tag-item' href='/genre/{slugify(g)}/'>{g}</a>" for g in GENRES)
+    category_links = "".join(f"<a class='tag-item' href='/category/{slugify(cat)}/'>{cat}</a>" for cat in CATEGORIES[:18])
+    content = dedent(f"""
+    <section class="container page-header">
+      <h1>Music Downloads</h1>
+      <p>Browse royalty-free and free-use music by genre, mood, and category for videos, podcasts, games, and creative projects.</p>
+    </section>
     <section class="container section-block">
-      <div class="tool-grid">
-        <article class="tool-card"><div class="icon">⏱️</div><h3>Practice Timer</h3><p>Pomodoro-style timer for focused music practice sessions.</p><a href="/tools/practice-timer.html">USE NOW</a></article>
-        <article class="tool-card"><div class="icon">🎼</div><h3>Pitch Pipe</h3><p>Reference tones for all 12 chromatic notes. Perfect for singers.</p><a href="/tools/pitch-pipe.html">USE NOW</a></article>
-        <article class="tool-card"><div class="icon">⭕</div><h3>Circle of Fifths</h3><p>Interactive diagram showing key relationships and music theory.</p><a href="/tools/circle-of-fifths.html">USE NOW</a></article>
+      <div class='section-box'>
+        <h2>Popular Genres</h2>
+        <div class='tag-cloud'>{genre_links}</div>
+      </div>
+    </section>
+    <section class="container section-block">
+      <div class='section-box'>
+        <h2>Popular Categories</h2>
+        <div class='tag-cloud'>{category_links}</div>
       </div>
     </section>
     """).strip()
-    return page_html(
-        title="Tools | FASTSONG",
-        description="Music and creator tools by FASTSONG, including practice timer, pitch pipe, and circle of fifths.",
-        keywords="music tools, practice timer, pitch pipe, circle of fifths",
-        canonical=f"{SITE_DOMAIN}/tools/",
-        body=body,
+    return render_page(
+        title="Music Downloads | FASTSONG",
+        description="Download free music by genre and category from FASTSONG. Browse royalty-free tracks, moods, and streaming-ready resources.",
+        keywords="free music download, royalty free music, genre download, category music, FASTSONG",
+        canonical_url=f"{SITE_DOMAIN}/music-downloads/",
+        content=content,
+        active_label="Home",
     )
 
 
-def build_static_page(title: str, heading: str, description: str):
-    body = dedent(f"""
+def build_tools_page():
+    cards = "".join(
+        f"<article class='tool-card'><div class='icon'>{tool['icon']}</div><h3>{tool['title']}</h3><p>{tool['desc']}</p><a href='/tools/{tool['slug']}.html'>USE NOW</a></article>" for tool in TOOLS
+    )
+    content = dedent(f"""
+    <section class="container page-header">
+      <h1>Tools</h1>
+      <p>Creative utilities for music practice, discovery, curation, and content planning.</p>
+    </section>
+    <section class="container section-block">
+      <div class="tool-grid">{cards}</div>
+    </section>
+    """).strip()
+    return render_page(
+        title="Tools | FASTSONG",
+        description="Use FASTSONG tools to plan practice sessions, generate playlists, explore genres, and improve music workflow.",
+        keywords="music tools, playlist generator, practice timer, pitch pipe, genre finder",
+        canonical_url=f"{SITE_DOMAIN}/tools/",
+        content=content,
+        active_label="Tools",
+    )
+
+
+def build_static_page(title: str, heading: str, description: str, slug: str):
+    content = dedent(f"""
     <section class="container page-header">
       <h1>{heading}</h1>
       <p>{description}</p>
     </section>
     <section class="container section-block">
-      <p>FASTSONG is built to provide reliable creative resources, royalty-free music, sound effects, tools, and useful educational content for modern creators.</p>
-      <p>This page is ready for further editorial updates and can be expanded with detailed FAQ sections, legal details, team information, and relevant resource links.</p>
+      <p>FASTSONG is built to help creators discover royalty-free sound resources, find relevant tools, and access practical content structured for SEO and modern publishing.</p>
+      <p>This page is generated for quick publishing and can be expanded with more detail, legal copy, or feature content depending on your editorial needs.</p>
     </section>
     """).strip()
-    return page_html(
+    return render_page(
         title=title,
         description=description,
-        keywords="FASTSONG, media resources, privacy, legal, contact",
-        canonical=f"{SITE_DOMAIN}/" + slugify(heading).replace("-policy","-policy").replace("-terms","-terms") + "/",
-        body=body,
+        keywords="FASTSONG, music resources, content creation, royalty free",
+        canonical_url=f"{SITE_DOMAIN}/{slug}/",
+        content=content,
+        active_label="Home",
+    )
+
+
+def article_sections(title: str):
+    return [
+        ("Introduction", f"{title} is one of the most important considerations for modern creators who need dependable, high-quality, and legally safe sound resources. In practice, choosing the right music or sound library can make a major difference in how audiences perceive a project."),
+        ("Why It Matters", f"Strong audio quality does not just improve the listening experience; it also supports emotional clarity, narrative focus, and overall professionalism. Whether the output is a social video, podcast, product showcase, or brand campaign, the right music adds credibility."),
+        ("Workflow and Creative Strategy", "A disciplined workflow begins with defining the purpose, audience, and intended emotional tone. From there, creators can compare royalty-free libraries, test tracks in a real editing environment, and make decisions based on relevance, quality, and licensing clarity."),
+        ("Optimization Techniques", "Great content remains searchable, relevant, and easy to navigate when metadata is clean and consistent. Titles, descriptions, tags, and visual previews should support the creative goal while helping optimize discoverability across search and social platforms."),
+        ("Tools and Production", "Content teams can improve efficiency by combining music libraries with editing software, workflow checklists, and practical.ai-enhanced tools. This reduces guesswork and keeps the final result consistent across multiple outputs."),
+        ("FAQ", "The right answer depends on your creative goal, audience, and licensing needs. Generally, the best resources are those with clear usage terms, strong production quality, consistent style, and good integration with your project workflow."),
+        ("Conclusion", f"In summary, {title} should be treated as both a creative decision and a strategic workflow choice. With the right mix of quality, licensing clarity, and practical management, creators can increase value while reducing friction across the publishing process."),
+    ]
+
+
+def build_article_html(title: str, category: str, slug: str):
+    article_text = ""
+    sections = article_sections(title)
+    for heading, text in sections:
+        article_text += f"<h2 id='{slugify(heading)}'>{heading}</h2><p>{text}</p>"
+    faq = """
+    <div class='faq-section'><h3>Frequently Asked Questions</h3>
+      <div class='faq-grid'>
+        <div class='faq-item'><h4>Q: Why is this important for creators?</h4><p>A: Because it improves quality, emotional delivery, and audience trust.</p></div>
+        <div class='faq-item'><h4>Q: Is royalty-free music enough?</h4><p>A: It can be, but licensing terms still need to be checked for commercial or branded projects.</p></div>
+        <div class='faq-item'><h4>Q: How do I choose the right track?</h4><p>A: Match the music to the tone, audience, and final use case before publishing.</p></div>
+        <div class='faq-item'><h4>Q: Can this apply to social content?</h4><p>A: Yes, especially for short-form videos where mood and pacing matter a lot.</p></div>
+        <div class='faq-item'><h4>Q: What should I review before export?</h4><p>A: Check the pacing, the emotional tone, and whether the track supports your message.</p></div>
+        <div class='faq-item'><h4>Q: Does quality matter more than quantity?</h4><p>A: In most creative workflows, quality and relevance matter more than simply having a larger library.</p></div>
+      </div>
+    </div>
+    """
+    share = "<div class='share-box'><h3>Share This Article</h3><div class='social-share'><a href='https://www.facebook.com/sharer/sharer.php?u=" + f"{SITE_DOMAIN}/blog/{slugify(category)}/{slug}.html" + "'>Facebook</a><a href='https://twitter.com/intent/tweet?url=" + f"{SITE_DOMAIN}/blog/{slugify(category)}/{slug}.html" + "'>Twitter</a><a href='https://www.linkedin.com/sharing/share-offsite/?url=" + f"{SITE_DOMAIN}/blog/{slugify(category)}/{slug}.html" + "'>LinkedIn</a></div></div>"
+    content = dedent(f"""
+    <article class="container article-wrap">
+      <div class="breadcrumb"><a href="/">Home</a> / <a href="/blog/">Blog</a> / <span>{category}</span></div>
+      <h1>{title}</h1>
+      <div class="meta-bar"><span>Category: {category}</span><span>Updated: 2026-10-30</span></div>
+      <div class="hero-image-box"><img src='https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80' alt='{title}' /></div>
+      <div class='toc-box'><h3>Table of Contents</h3><ul>
+        <li><a href='#introduction'>Introduction</a></li>
+        <li><a href='#why-it-matters'>Why It Matters</a></li>
+        <li><a href='#workflow-and-creative-strategy'>Workflow and Creative Strategy</a></li>
+        <li><a href='#optimization-techniques'>Optimization Techniques</a></li>
+        <li><a href='#tools-and-production'>Tools and Production</a></li>
+        <li><a href='#faq'>FAQ</a></li>
+        <li><a href='#conclusion'>Conclusion</a></li>
+      </ul></div>
+      <div class='article-body'>{article_text}{faq}<h2 id='conclusion'>Conclusion</h2><p>As publishing ecosystems keep evolving, the smartest approach is to build a sustainable system around quality, licensing clarity, and creative relevance. This ensures every asset supports trust, consistency, and stronger engagement over time.</p>{share}</div>
+    </article>
+    """).strip()
+    return render_page(
+        title=f"{title} | FASTSONG",
+        description=f"Read a practical guide about {title.lower()} with creator-focused insights, production tips, and SEO-friendly structure.",
+        keywords=f"{title.lower()}, {category.lower()}, royalty free, content creation, music articles",
+        canonical_url=f"{SITE_DOMAIN}/blog/{slugify(category)}/{slug}.html",
+        content=content,
+        active_label="Home",
+    )
+
+
+def build_tool_page(tool: dict):
+    content = dedent(f"""
+    <section class="container tool-page">
+      <div class="tool-hero">
+        <div class="tool-icon">{tool['icon']}</div>
+        <div>
+          <h1>{tool['title']}</h1>
+          <p>{tool['desc']}</p>
+          <a class='btn primary' href='#'>USE NOW</a>
+        </div>
+      </div>
+      <div class='tool-layout'>
+        <div class='tool-main'>
+          <h2>How to Use This Tool</h2>
+          <p>Start by understanding your content objective, then set the right parameters for the workflow. Review the result in context, adjust based on your audience, and publish with confidence.</p>
+          <p>Fast, intuitive tools help creators organize ideas, manage music choices, and make better decisions earlier in the process.</p>
+          <h2>Why It Helps</h2>
+          <p>Creative workflows become easier when the right tool reduces guesswork. This helps maintain consistency, quality, and speed across projects of different sizes.</p>
+          <h2>Related Resources</h2>
+          <ul>
+            <li><a href="/music-downloads/">Download music</a></li>
+            <li><a href="/blog/">Explore blog articles</a></li>
+            <li><a href="/tools/">Browse all tools</a></li>
+          </ul>
+        </div>
+        <aside class='tool-side'>
+          <h3>Quick Links</h3>
+          <ul>
+            <li><a href="/tools/practice-timer.html">Practice Timer</a></li>
+            <li><a href="/tools/pitch-pipe.html">Pitch Pipe</a></li>
+            <li><a href="/tools/circle-of-fifths.html">Circle of Fifths</a></li>
+            <li><a href="/tools/playlist-generator.html">Playlist Generator</a></li>
+          </ul>
+          <div class='ad-slot'>Google Ads</div>
+        </aside>
+      </div>
+    </section>
+    """).strip()
+    return render_page(
+        title=f"{tool['title']} | FASTSONG",
+        description=f"Use the {tool['title']} tool by FASTSONG to improve creative workflows, music discovery, and audio practice.",
+        keywords=f"{tool['title'].lower()}, music tool, FASTSONG tools, audio workflow",
+        canonical_url=f"{SITE_DOMAIN}/tools/{tool['slug']}.html",
+        content=content,
+        active_label="Tools",
+    )
+
+
+def build_category_page(category: str):
+    article_list = "".join(
+        f"<article class='post-card'><div class='tag'>{category}</div><h3>{category} guide #{i}</h3><a href='/blog/{slugify(category)}/article-{i}.html'>Read article</a></article>"
+        for i in range(1, 7)
+    )
+    content = dedent(f"""
+    <section class="container page-header">
+      <h1>{category}</h1>
+      <p>Explore curated music, audio, and content workflows for {category.lower()}.</p>
+    </section>
+    <section class="container section-block">
+      <div class="post-grid">{article_list}</div>
+    </section>
+    """).strip()
+    return render_page(
+        title=f"{category} | FASTSONG",
+        description=f"Explore {category.lower()} guides, tool recommendations, and creative inspiration from FASTSONG.",
+        keywords=f"{category.lower()}, music resources, audio articles, royalty free",
+        canonical_url=f"{SITE_DOMAIN}/category/{slugify(category)}/",
+        content=content,
+        active_label="Home",
+    )
+
+
+def build_genre_page(genre: str):
+    category_links = "".join(f"<a class='tag-item' href='/category/{slugify(cat)}/'>{cat}</a>" for cat in CATEGORIES[:8])
+    content = dedent(f"""
+    <section class="container page-header">
+      <h1>{genre} Music</h1>
+      <p>Explore {genre.lower()} tracks, moods, and free-use sound resources for podcasts, videos, games, and branded content.</p>
+    </section>
+    <section class="container section-block">
+      <div class="section-box">
+        <h2>Included categories</h2>
+        <div class='tag-cloud'>{category_links}</div>
+      </div>
+    </section>
+    """).strip()
+    return render_page(
+        title=f"{genre} Music | FASTSONG",
+        description=f"Browse {genre.lower()} music and related creative content, curated for videos, channels, podcasts, and editorial projects.",
+        keywords=f"{genre.lower()} music, royalty free {genre.lower()}, genre download, music library",
+        canonical_url=f"{SITE_DOMAIN}/genre/{slugify(genre)}/",
+        content=content,
+        active_label="Home",
     )
 
 
@@ -256,138 +572,88 @@ def write_file(path: Path, content: str):
     path.write_text(content, encoding="utf-8")
 
 
-def build_project():
-    root = Path("dist")
-    write_file(root / "index.html", build_home())
-    write_file(root / "blog" / "index.html", build_blog_index())
-    write_file(root / "tools" / "index.html", build_tools_index())
+def make_logo_svg():
+    return """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 96'><rect width='320' height='96' rx='16' fill='#0f172a'/><text x='26' y='58' font-family='Arial, sans-serif' font-size='36' font-weight='700' fill='#f8fafc'>FASTSONG</text></svg>"""
 
-    # static legal pages
-    static_pages = {
-        "about-us": ("About Us | FASTSONG", "About Us", "Learn more about FASTSONG and our mission to organize creative, music, and audio resources."),
-        "contact-us": ("Contact Us | FASTSONG", "Contact Us", "Contact FASTSONG for media, partnership, editorial, and resource or question requests."),
-        "terms": ("Terms of Service | FASTSONG", "Terms of Service", "Read the terms of use and service rules for FASTSONG."),
-        "privacy-policy": ("Privacy Policy | FASTSONG", "Privacy Policy", "Understand how FASTSONG handles information and user privacy."),
-        "news-update": ("News Update | FASTSONG", "News Update", "Keep up with FASTSONG updates, resources, and the latest creative trends."),
-        "academy": ("Academy | FASTSONG", "Academy", "Learn practical knowledge about music, sound, media, and production workflows."),
-        "training": ("Training | FASTSONG", "Training", "Training content and educational resources for creators, teams, and music enthusiasts."),
-        "partners": ("Partners | FASTSONG", "Partners", "Discover partnerships and related creator collaborations supported by FASTSONG."),
-        "advertise": ("Advertise | FASTSONG", "Advertise", "Advertise on FASTSONG and reach creators, musicians, and digital media audiences."),
-    }
-    for slug, data in static_pages.items():
-        title, heading, description = data
-        write_file(root / f"{slug}.html", build_static_page(title, heading, description))
+
+def build_project():
+    root = Path('dist')
+
+    # root static files
+    write_file(root / 'index.html', build_home_page())
+    write_file(root / 'blog' / 'index.html', build_blog_index_page())
+    write_file(root / 'music-downloads' / 'index.html', build_music_downloads_page())
+    write_file(root / 'tools' / 'index.html', build_tools_page())
+
+    for slug, title in LEGAL_PAGES.items():
+        write_file(root / f'{slug}.html', build_static_page(f"{title} | FASTSONG", title, f"{title} for FASTSONG. This page is ready for final editorial or legal expansion.", slug))
+
+    # category pages and genre pages
+    for cat in CATEGORIES:
+        write_file(root / 'category' / f'{slugify(cat)}/index.html', build_category_page(cat))
+
+    for genre in GENRES:
+        write_file(root / 'genre' / f'{slugify(genre)}/index.html', build_genre_page(genre))
 
     # tools pages
-    tool_pages = {
-        "practice-timer": ("Practice Timer | FASTSONG", "Practice Timer", "Pomodoro-style timer for focused music practice sessions."),
-        "pitch-pipe": ("Pitch Pipe | FASTSONG", "Pitch Pipe", "Reference tones for all 12 chromatic notes. Perfect for singers."),
-        "circle-of-fifths": ("Circle of Fifths | FASTSONG", "Circle of Fifths", "Interactive diagram showing key relationships and music theory."),
-    }
-    for slug, data in tool_pages.items():
-        title, heading, description = data
-        body = dedent(f"""
-        <section class="container tool-page">
-          <div class="tool-hero">
-            <div class="tool-icon">{'⏱️' if 'timer' in slug else '🎼' if 'pitch' in slug else '⭕'}</div>
-            <div>
-              <h1>{heading}</h1>
-              <p>{description}</p>
-              <a class="btn primary" href="#">USE NOW</a>
-            </div>
-          </div>
-          <div class="tool-layout">
-            <div class="tool-main">
-              <h2>How to use this tool</h2>
-              <p>Start by selecting the goal or function you want. Adjust the values, parameters, or settings to fit the exercise or project, then apply the result to your workflow.</p>
-              <p>These tools are designed to support creativity, structure, and efficiency for musicians, editors, students, and professional content creators.</p>
-              <h2>Why it matters</h2>
-              <p>Using focused tools helps reduce guesswork, supports consistency, and speeds up content production while preserving quality and sound.</p>
-              <h2>Related articles</h2>
-              <ul>
-                <li><a href="/blog/instrumental-music/best-royalty-free-music-tools-for-content-creators.html">Best royalty free music tools for content creators</a></li>
-                <li><a href="/blog/sound-effects/how-to-choose-right-sound-effects-for-video-editing.html">How to choose the right sound effects for video editing</a></li>
-                <li><a href="/blog/technology-tools/music-production-basics-for-beginners-in-2026.html">Music production basics for beginners in 2026</a></li>
-              </ul>
-            </div>
-            <aside class="tool-side">
-              <h3>Quick Links</h3>
-              <ul>
-                <li><a href="/tools/">All Tools</a></li>
-                <li><a href="/blog/">Blog</a></li>
-                <li><a href="/contact-us/">Contact</a></li>
-              </ul>
-              <div class="ad-slot">Google Ads</div>
-            </aside>
-          </div>
-        </section>
-        """).strip()
-        write_file(root / "tools" / f"{slug}.html", page_html(title, description, "FASTSONG tool, music tool, audio tool", f"{SITE_DOMAIN}/tools/{slug}.html", body))
+    for tool in TOOLS:
+        write_file(root / 'tools' / f"{tool['slug']}.html", build_tool_page(tool))
 
-    # article pages
-    article_pages = {
-        "best-royalty-free-music-tools-for-content-creators": ("Best Royalty Free Music Tools for Content Creators | FASTSONG", "Best Royalty Free Music Tools for Content Creators", "Instrumental Music"),
-        "how-to-choose-right-sound-effects-for-video-editing": ("How to Choose the Right Sound Effects for Video Editing | FASTSONG", "How to Choose the Right Sound Effects for Video Editing", "Sound Effects"),
-        "music-production-basics-for-beginners-in-2026": ("Music Production Basics for Beginners in 2026 | FASTSONG", "Music Production Basics for Beginners in 2026", "Technology | Tools"),
-    }
-    for slug, data in article_pages.items():
-        title, heading, category = data
-        article_body = dedent(f"""
-        <article class="container article-wrap">
-          <div class="breadcrumb"><a href="/">Home</a> / <a href="/blog/">Blog</a> / <span>{category}</span></div>
-          <h1>{heading}</h1>
-          <div class="meta-bar"><span>Category: {category}</span><span>Updated: 2026-10-30</span></div>
-          <div class="hero-image-box"><img src="https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=1200&q=80" alt="{heading}" /></div>
-          <div class="toc-box"><h3>Table of Contents</h3><ul><li><a href="#intro">Introduction</a></li><li><a href="#why-it-matters">Why It Matters</a></li><li><a href="#workflow">Workflow</a></li><li><a href="#tips">Tips</a></li><li><a href="#faq">FAQ</a></li><li><a href="#conclusion">Conclusion</a></li></ul></div>
-          <div class="article-body">
-            <h2 id="intro">Introduction</h2>
-            <p>Content creators increasingly need reliable music and sound resources that are fast to access, easy to use, and legally safe for publishing. Royalty-free music plays a central role in helping creators maintain quality while avoiding licensing issues and expensive production bottlenecks.</p>
-            <p>When a creator picks the right tool, the impact is visible across the entire production process. The workflow becomes cleaner, the final result feels more refined, and the value of the content increases for viewers. This is why thoughtful selection matters more than simply choosing a random track or sound pack.</p>
-            <h2 id="why-it-matters">Why It Matters</h2>
-            <p>Modern audiences respond strongly to audio quality. A polished opening, a clean mood fit, and a reliable sound design can make a video or product page feel more professional and trustworthy. Strong sound also supports retention, storytelling, and emotional continuity.</p>
-            <p>For creators, the challenge is often not the availability of resources but the ability to choose the right option for the right context. Good curation helps reduce wasted time and improves the consistency of a project across multiple outputs.</p>
-            <h2 id="workflow">Workflow</h2>
-            <p>To build a sustainable workflow, start by defining your needs, your audience, and your visual tone. Then compare available libraries, tools, and licensing terms. It is important to review whether a piece of audio is truly suitable for commercial use, whether it fits the mood, and whether it will maintain clarity against voiceover or visuals.</p>
-            <p>After you identify a sound or music resource, test it in context before final publishing. Listen on different devices, check how it interacts with speech, and confirm whether it supports the stronger emotional direction you want to create.</p>
-            <h2 id="tips">Tips</h2>
-            <p>Look for quality metadata, clear licensing explanations, and consistent audio production standards. Licensing clarity is especially important for businesses publishing on social media, websites, and branded content. A good library or tool should match your production values and support your publishing goals.</p>
-            <p>Use a shortlist approach: keep a small set of trusted resources, evaluate their flexibility, and update your collection based on actual publishing results and audience feedback. This strategy is more efficient than collecting too many random files without any system.</p>
-            <div class="faq-section"><h3 id="faq">Frequently Asked Questions</h3><div class="faq-grid"><div class="faq-item"><h4>Q: Is royalty free always safe to use?</h4><p>A: Usually yes, but you still need to review the terms and understand the allowed use cases.</p></div><div class="faq-item"><h4>Q: Can I use music in ads?</h4><p>A: Many royalty-free libraries can be used in ads, but some require extended licenses or commercial terms.</p></div><div class="faq-item"><h4>Q: What matters more: quality or licensing?</h4><p>A: Both matter, but legal clarity is essential before publishing any material.</p></div></div></div>
-            <h2 id="conclusion">Conclusion</h2>
-            <p>Choosing the right royalty-free music tools is not just a technical choice; it is a creative and strategic decision. The best approach combines quality, legal clarity, and a consistent workflow. When creators make thoughtful choices, the result is clearer storytelling, stronger brand perception, and a smoother production process.</p>
-          </div>
-        </article>
-        """).strip()
-        category_path = root / "blog" / slugify(category)
-        category_path.mkdir(parents=True, exist_ok=True)
-        write_file(category_path / f"{slug}.html", page_html(title, "SEO description for this article.", f"{category.lower()}, royalty free, music tools", f"{SITE_DOMAIN}/blog/{slugify(category)}/{slug}.html", article_body))
+    # article pages for sample categories
+    article_categories = [
+        "Instrumental Music",
+        "Vocal Songs",
+        "Loops",
+        "Sound Effects",
+        "Technology | Tools",
+        "Nature | Animal",
+    ]
+    for category in article_categories:
+        category_dir = root / 'blog' / slugify(category)
+        category_dir.mkdir(parents=True, exist_ok=True)
+        for i in range(1, 6):
+            title = f"{category} Guide {i}: Creative Workflow and Professional Audio Strategy"
+            slug = f"article-{i}"
+            write_file(category_dir / f'{slug}.html', build_article_html(title, category, slug))
 
-    # manifest and other root files
-    write_file(root / "manifest.json", json.dumps({
+    # final supporting files
+    manifest = {
         "name": SITE_NAME,
         "short_name": SITE_NAME,
         "start_url": "/",
         "display": "standalone",
         "background_color": "#0b1020",
         "theme_color": "#0f172a",
-        "icons": [{"src": "/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png"}, {"src": "/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png"}]
-    }, indent=2))
-    write_file(root / "robots.txt", "User-agent: *\nAllow: /\nSitemap: https://fastsong.eu.org/sitemap.xml\n")
-    write_file(root / "sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://fastsong.eu.org/</loc></url><url><loc>https://fastsong.eu.org/blog/</loc></url><url><loc>https://fastsong.eu.org/tools/</loc></url><url><loc>https://fastsong.eu.org/privacy-policy/</loc></url><url><loc>https://fastsong.eu.org/terms/</loc></url></urlset>')
-    write_file(root / "ads.txt", "google.com, pub-9308517202792186, DIRECT, f08c47fec0942fa0\n")
-    write_file(root / "app-ads.txt", "google.com, pub-9308517202792186, DIRECT, f08c47fec0942fa0\n")
-    write_file(root / "google510371859970acbf.html", '<!doctype html><html><head><meta name="google-site-verification" content="xMW77g3fbb-5Di9z1eZWT9pdaR91IsnYQBhJqbOpMdk" /></head><body>Google verification</body></html>')
-    write_file(root / "feed.xml", '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>FASTSONG</title><link>https://fastsong.eu.org</link><description>FASTSONG blog feed</description><item><title>Best Royalty Free Music Tools for Content Creators</title><link>https://fastsong.eu.org/blog/instrumental-music/best-royalty-free-music-tools-for-content-creators.html</link></item></channel></rss>')
+        "icons": [
+            {"src": "/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+            {"src": "/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
+        ]
+    }
+    write_file(root / 'manifest.json', json.dumps(manifest, indent=2))
+    write_file(root / 'ads.txt', "google.com, pub-9308517202792186, DIRECT, f08c47fec0942fa0\n")
+    write_file(root / 'app-ads.txt', "google.com, pub-9308517202792186, DIRECT, f08c47fec0942fa0\n")
+    write_file(root / 'google510371859970acbf.html', f"<!doctype html><html><head><meta name='google-site-verification' content='{GOOGLE_VERIFY_2}' /></head><body>Google verification</body></html>")
+    write_file(root / 'robots.txt', "User-agent: *\nAllow: /\nSitemap: https://fastsong.eu.org/sitemap.xml\n")
+    write_file(root / 'sitemap.xml', "<?xml version='1.0' encoding='UTF-8'?><urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'><url><loc>https://fastsong.eu.org/</loc></url><url><loc>https://fastsong.eu.org/blog/</loc></url><url><loc>https://fastsong.eu.org/music-downloads/</loc></url><url><loc>https://fastsong.eu.org/tools/</loc></url><url><loc>https://fastsong.eu.org/privacy-policy/</loc></url><url><loc>https://fastsong.eu.org/terms/</loc></url></urlset>")
+    write_file(root / 'feed.xml', "<?xml version='1.0' encoding='UTF-8'?><rss version='2.0'><channel><title>FASTSONG</title><link>https://fastsong.eu.org</link><description>FASTSONG feed</description><item><title>Best royalty-free music tools</title><link>https://fastsong.eu.org/blog/instrumental-music/article-1.html</link></item></channel></rss>")
 
     # assets
-    write_file(root / "assets" / "css" / "style.css", """:root{--bg:#07111b;--panel:#0f172a;--text:#edf2ff;--muted:#b8c3d9;--primary:#38bdf8;--accent:#f59e0b;--border:rgba(148,163,184,.16)}*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#07111b,#0d1724 35%,#091421);color:var(--text)}a{color:var(--primary);text-decoration:none}img{max-width:100%;display:block}main{padding-bottom:50px}.container{width:min(1180px,92%);margin:0 auto}.site-header{position:sticky;top:0;background:rgba(7,17,27,.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);z-index:10}.topbar{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:14px 0}.logo-box img{max-width:170px}.nav{display:flex;flex-wrap:wrap;list-style:none;padding:0;margin:0;gap:14px}.nav a{color:var(--muted);font-weight:600}.nav a:hover{color:var(--text)}.lang-switcher{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:12px}.lang-switcher span{padding:6px 10px;border:1px solid var(--border);border-radius:999px}.hero{padding:70px 0 30px}.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:center}.hero h1{font-size:clamp(2.2rem,4vw,4.2rem);line-height:1.05;margin:0 0 16px}.eyebrow{display:inline-block;padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(56,189,248,.08);color:var(--primary);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.btn{display:inline-block;padding:12px 18px;border-radius:10px;font-weight:700}.btn.primary{background:var(--primary);color:#03151d}.btn.ghost{border:1px solid var(--border);color:var(--text)}.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.hero-card,.tool-card,.post-card,.category-card,.faq-item,.toc-box,.callout,.tool-side,.article-wrap,.tool-page,.share-box{background:rgba(17,28,45,.72);border:1px solid var(--border);border-radius:18px;box-shadow:0 12px 30px rgba(2,6,23,.15)}.hero-card{padding:22px;display:grid;gap:12px}.mini-tool{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--border);border-radius:12px;background:rgba(148,163,184,.03)}.mini-tool span{font-size:2rem}.section-block{padding:32px 0}.section-head h2{margin:0 0 18px;font-size:2rem}.category-grid,.post-grid,.tool-grid,.faq-grid{display:grid;gap:18px}.category-grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}.post-grid,.tool-grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.category-card,.post-card,.tool-card{padding:18px;display:block}.category-card{font-weight:700;color:var(--text)} .tag{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(245,158,11,.12);color:var(--accent);font-size:11px}.tool-card .icon{font-size:2rem}.page-header{padding:50px 0 16px}.page-header h1{font-size:clamp(2.3rem,3vw,3.1rem);margin:0 0 12px}.tool-page,.article-wrap{padding:28px 20px 24px;margin:30px auto}.article-wrap h1,.tool-page h1{font-size:clamp(2.2rem,3vw,3.2rem)}.meta-bar{display:flex;gap:24px;flex-wrap:wrap;color:var(--muted);margin:16px 0}.hero-image-box{margin:18px 0 22px;border-radius:18px;overflow:hidden;border:1px solid var(--border)}.toc-box{padding:18px 20px;margin-bottom:18px}.article-body p,.tool-main p,.tool-main li{color:var(--muted);line-height:1.8}.tool-layout{display:grid;grid-template-columns:1.4fr .6fr;gap:18px;margin-top:20px}.tool-hero{display:grid;grid-template-columns:120px minmax(0,1fr);gap:18px;align-items:center}.tool-icon{height:110px;display:grid;place-items:center;font-size:4rem;border:1px solid var(--border);border-radius:18px;background:rgba(56,189,248,.08)}.ad-slot{min-height:160px;display:grid;place-items:center;color:var(--muted);border:1px solid var(--border);border-radius:12px;margin-top:16px}.site-footer{padding:40px 0 18px;border-top:1px solid var(--border);margin-top:20px;background:rgba(8,15,24,.9)}.footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}.footer-grid ul{list-style:none;padding:0;margin:0;line-height:2}.copyright{padding-top:18px;border-top:1px solid var(--border);margin-top:18px;text-align:center;color:var(--muted)}@media(max-width:900px){.hero-grid,.tool-layout,.tool-hero{grid-template-columns:1fr}.topbar{display:block}.nav{justify-content:center;margin:12px 0}.lang-switcher{justify-content:center}}@media(max-width:560px){.cta-row{display:block}.btn{width:100%;text-align:center}.nav{justify-content:center}}""")
-    write_file(root / "assets" / "js" / "app.js", "document.addEventListener('DOMContentLoaded', ()=>{document.querySelectorAll('.nav a').forEach(a=>a.classList.add('nav-link'));});")
+    assets = root / 'assets'
+    (assets / 'css').mkdir(parents=True, exist_ok=True)
+    (assets / 'js').mkdir(parents=True, exist_ok=True)
+    (assets / 'icons').mkdir(parents=True, exist_ok=True)
+    (assets / 'images').mkdir(parents=True, exist_ok=True)
 
-    # placeholder icons/images
-    for p in [root / "assets" / "icons" / "icon-192.png", root / "assets" / "icons" / "icon-512.png", root / "assets" / "images" / "og-default.jpg", root / "assets" / "images" / "logo.png"]:
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_bytes(b"")
+    write_file(assets / 'css' / 'style.css', """:root{--bg:#07111b;--panel:#0f172a;--text:#edf2ff;--muted:#b8c3d9;--primary:#38bdf8;--accent:#f59e0b;--border:rgba(148,163,184,.2)}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#07111b,#0d1724 35%,#091421);color:var(--text)}a{text-decoration:none;color:var(--primary)}img{max-width:100%;display:block}main{padding-bottom:60px}.container{width:min(1180px,92%);margin:0 auto}.site-header{position:sticky;top:0;z-index:10;background:rgba(7,17,27,.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}.topbar{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:12px 0}.brand img{max-width:180px}.main-nav ul{display:flex;list-style:none;padding:0;margin:0;gap:16px;flex-wrap:wrap}.nav-item a{color:var(--muted);font-weight:700}.nav-item a.active,.nav-item a:hover{color:var(--text)}.lang-switcher{display:flex;gap:8px;flex-wrap:wrap}.lang-switcher span{display:inline-block;padding:6px 10px;border:1px solid var(--border);border-radius:999px;color:var(--muted);font-size:12px}.hero{padding:80px 0 30px}.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:26px;align-items:center}.hero h1{font-size:clamp(2.2rem,4vw,4rem);line-height:1.08;margin:0 0 18px}.eyebrow{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:rgba(56,189,248,.08);color:var(--primary);font-size:12px;letter-spacing:.1em;text-transform:uppercase}.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.btn{display:inline-block;padding:12px 18px;border-radius:10px;font-weight:700}.btn.primary{background:var(--primary);color:#03151d}.btn.ghost{border:1px solid var(--border);color:var(--text)}.hero-card,.tool-card,.post-card,.category-card,.section-box,.faq-item,.ad-slot,.tool-side,.article-wrap,.tool-page,.share-box,.toc-box{background:rgba(17,28,45,.72);border:1px solid var(--border);border-radius:18px;box-shadow:0 16px 34px rgba(2,6,23,.18)}.hero-card{padding:22px;display:grid;gap:14px}.mini-tool{display:flex;align-items:center;gap:14px;padding:12px;border:1px solid var(--border);border-radius:12px;background:rgba(148,163,184,.04)}.mini-tool span{font-size:2rem}.section-block{padding:32px 0}.section-head h2{margin:0 0 18px;font-size:2rem}.category-grid,.post-grid,.tool-grid,.faq-grid{display:grid;gap:18px}.category-grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}.post-grid,.tool-grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.category-card,.post-card,.tool-card{padding:18px;display:block}.category-card{font-weight:700;color:var(--text)}.tag{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(245,158,11,.12);color:var(--accent);font-size:11px}.tool-card .icon{font-size:2rem}.genre-cloud,.tag-cloud{display:flex;gap:10px;flex-wrap:wrap}.genre-cloud span,.tag-item{display:inline-block;padding:10px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(148,163,184,.04);color:var(--text);font-size:12px}.page-header{padding:50px 0 20px}.page-header h1{font-size:clamp(2.3rem,3vw,3rem);margin:0 0 10px}.article-wrap,.tool-page{padding:30px 20px}.article-wrap h1,.tool-page h1{font-size:clamp(2.3rem,3vw,3.1rem)}.breadcrumb{color:var(--muted);margin-bottom:14px}.meta-bar{display:flex;gap:20px;flex-wrap:wrap;color:var(--muted);margin:16px 0}.hero-image-box{margin:18px 0 22px;border-radius:18px;overflow:hidden;border:1px solid var(--border)}.toc-box{padding:18px 20px;margin-bottom:20px}.article-body p,.tool-main p,.tool-main li,.section-box p{color:var(--muted);line-height:1.8}.article-body h2,.tool-main h2{margin-top:30px}.faq-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:20px}.faq-item{padding:16px}.social-share{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}.share-box{padding:18px 20px;margin-top:24px}.tool-hero{display:grid;grid-template-columns:120px minmax(0,1fr);gap:18px;align-items:center}.tool-icon{height:110px;display:grid;place-items:center;border:1px solid var(--border);border-radius:18px;background:rgba(56,189,248,.08);font-size:4rem}.tool-layout{display:grid;grid-template-columns:1.45fr .55fr;gap:18px;margin-top:22px}.tool-side{padding:18px}.ad-slot{min-height:160px;display:grid;place-items:center;color:var(--muted);margin-top:18px}.site-footer{padding:40px 0 20px;border-top:1px solid var(--border);margin-top:16px;background:rgba(8,15,24,.9)}.footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}.footer-grid ul{list-style:none;padding:0;margin:0;line-height:2}.copyright{padding-top:18px;border-top:1px solid var(--border);margin-top:20px;text-align:center;color:var(--muted)}@media (max-width:900px){.hero-grid,.tool-layout,.tool-hero{grid-template-columns:1fr}.topbar{display:block}.main-nav ul{justify-content:center}.lang-switcher{justify-content:center}}@media (max-width:560px){.cta-row{display:block}.btn{width:100%;text-align:center}.topbar{padding:10px 0}}""")
+    write_file(assets / 'js' / 'app.js', "document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('.nav-item a').forEach(a => a.addEventListener('click', () => document.querySelectorAll('.nav-item a').forEach(el => el.classList.remove('active')) && a.classList.add('active'))));")
+    write_file(assets / 'images' / 'logo.svg', make_logo_svg())
+    for img in ['og-default.jpg', 'logo.png']:
+        (assets / 'images' / img).write_bytes(b'')
+    for icon in ['icon-192.png', 'icon-512.png']:
+        (assets / 'icons' / icon).write_bytes(b'')
 
-if __name__ == "__main__":
+    print('FASTSONG premium static site generated in dist/')
+
+
+if __name__ == '__main__':
     build_project()
-    print("FASTSONG website generated successfully in dist/ using domain https://fastsong.eu.org")

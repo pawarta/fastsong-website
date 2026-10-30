@@ -1,31 +1,35 @@
-# FASTSONG Website Generator
+FASTSONG Premium Static Generator
 
-This repository contains a static website generator for FASTSONG using the domain `https://fastsong.eu.org`.
+This repository now includes a more complete static website generator for FASTSONG using the domain `https://fastsong.eu.org`.
 
-## Generate output
+What is included:
+- Premium responsive homepage and blog layout
+- Music download and genre/category landing pages
+- Category pages and article pages
+- Support tools and tool landing pages
+- SEO metadata, JSON-LD, Open Graph, canonical, adsense, verification
+- PWA manifest and root files for static publishing
+
+How to generate the site:
 
 ```bash
 python generate_fastsong.py
 ```
 
-This creates a publish-ready static site under the `dist/` directory.
+The generated upload-ready static output is placed in:
 
-## Files included
+```bash
+dist/
+```
 
-- `dist/index.html`
-- `dist/blog/index.html`
-- `dist/tools/index.html`
-- `dist/manifest.json`
-- `dist/sitemap.xml`
-- `dist/robots.txt`
-- `dist/ads.txt`
-- `dist/app-ads.txt`
-- `dist/google510371859970acbf.html`
+The static site is designed to be uploaded to:
+- Netlify
+- Vercel
+- GitHub Pages
+- cPanel
+- S3 static hosting
 
-## Domain used
-
-`https://fastsong.eu.org`
-
-## Publish
-
-Upload the full contents of `dist/` to any static host (GitHub Pages, Netlify, Vercel, cPanel, S3 static hosting, or your preferred CMS host).
+Notes:
+- The domain used is `https://fastsong.eu.org`
+- All head metadata includes Google verification and AdSense setup
+- The folder is ready for direct upload after generation
