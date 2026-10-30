@@ -1,0 +1,1 @@
+document.addEventListener('DOMContentLoaded', ()=>{document.querySelectorAll('.nav a').forEach(a=>a.classList.add('nav-link'));});
