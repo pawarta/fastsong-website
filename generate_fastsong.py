@@ -3,7 +3,7 @@ import json
 import re
 from textwrap import dedent
 
-SITE_DOMAIN = "https://fastsong.eu.org"
+SITE_DOMAIN = ""
 SITE_NAME = "FASTSONG"
 ADSENSE_CLIENT = "ca-pub-9308517202792186"
 GOOGLE_VERIFY_1 = "Gw7Z7swUZPrZIYzmklJDBBAZ_T6WcayrdpFYVbQhnEg"
