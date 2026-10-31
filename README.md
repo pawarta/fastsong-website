@@ -1,44 +1,23 @@
-FASTSONG Premium Editorial Generator
+# FASTSONG generator
 
-This repository contains a premium static-site generator for FASTSONG using the domain:
-https://fastsong.eu.org
+This repository contains a Python static-site generator for FASTSONG with:
+- responsive layout
+- automatic subfolder generation
+- article generation
+- category and genre pages
+- tools, music downloads page
+- SEO metadata, Open Graph, JSON-LD, manifest, sitemap, robots, ads.txt, app-ads.txt
+- CNAME for GitHub Pages custom domain: `fastsong.eu.org`
 
-Features:
-- SEO-ready pages with meta title, description, keywords, Open Graph, canonical links
-- Google verification and AdSense metadata
-- PWA manifest and root static files
-- Responsive premium layout
-- Blog categories and article generation
-- Download/genre/category pages
-- Tool pages and multiple landing sections
-- Automatic folder generation for category, genre, blog, and tools
-- 35 article pages per category
-
-How to generate the site:
+Run:
 
 ```bash
 python generate_fastsong.py
 ```
 
-Then upload the contents of `dist/` to any static hosting platform such as:
-- Netlify
-- Vercel
-- GitHub Pages
-- cPanel
-- S3 static hosting
+Then upload the contents of the `dist/` folder to GitHub Pages, Netlify, Vercel, or any static hosting provider.
 
-Files included in generated output:
-- `dist/index.html`
-- `dist/blog/`
-- `dist/category/`
-- `dist/genre/`
-- `dist/tools/`
-- `dist/music-downloads/`
-- `dist/manifest.json`
-- `dist/robots.txt`
-- `dist/sitemap.xml`
-- `dist/ads.txt`
-- `dist/app-ads.txt`
-- `dist/google510371859970acbf.html`
+Custom domain:
+- `https://fastsong.eu.org`
 
-This generator is designed to create the final editorial-premium site structure automatically, without needing manual HTML creation for each page.
+A `CNAME` file is already generated in the output to support custom domain deployment.
