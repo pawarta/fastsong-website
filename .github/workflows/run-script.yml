@@ -1,0 +1,36 @@
+name: Run FastSong Generator
+
+on:
+  workflow_dispatch: # Memungkinkan tombol 'Run workflow' diklik manual di tab Actions
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Memberikan izin agar Actions bisa menulis/menyimpan file ke repo
+      
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # Jika skrip Anda butuh library tambahan, tambahkan di sini (misal: pip install requests)
+
+    - name: Run Python Script
+      run: python generate_fastsong.py
+
+    - name: Commit and Push Changes
+      run: |
+        git config --global user.name 'GitHub Actions Bot'
+        git config --global user.email 'actions@github.com'
+        git add .
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-generate files via GitHub Actions" && git push)
